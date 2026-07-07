@@ -70,10 +70,7 @@ func initConfig() {
 	}
 
 	// Set defaults
-	viper.SetDefault("database", "bsh-spy-go.db")
-	viper.SetDefault("verbose", false)
-	viper.SetDefault("debug", false)
-	viper.SetDefault("log_json", false)
+	config.SetDefaults()
 
 	// Read in environment variables that match
 	viper.AutomaticEnv()
@@ -110,12 +107,7 @@ func setupLogging() {
 // GetConfig returns the application configuration, loading it if necessary
 func GetConfig() *config.Config {
 	if cfg == nil {
-		cfg = &config.Config{
-			Database: viper.GetString("database"),
-			Verbose:  viper.GetBool("verbose"),
-			Debug:    viper.GetBool("debug"),
-			LogJSON:  viper.GetBool("log_json"),
-		}
+		cfg = config.Load()
 	}
 	return cfg
 }
