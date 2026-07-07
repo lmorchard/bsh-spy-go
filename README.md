@@ -73,13 +73,20 @@ lists the user's playlists (handy for finding a playlist ID).
 
 ```bash
 docker build -t bsh-spy-go .
+mkdir -p data
 docker run -d --restart unless-stopped \
-  --env-file ./.env -v "$PWD/data:/data" \
+  --env-file ./.env \
+  -v "$PWD/data:/data" \
+  --user "$(id -u):$(id -g)" \
   -e DATABASE=/data/bsh.db \
   --name bsh-spy bsh-spy-go run
 ```
 
 The image is built from `gcr.io/distroless/static-debian12:nonroot`, so it
-ships no shell and runs as a non-root user. `/data` is declared as a
-volume for the SQLite cache; mount it (and point `DATABASE` at a path
-inside it) so the cache survives container restarts.
+ships no shell and runs as a non-root user (UID 65532). `/data` is declared
+as a volume for the SQLite cache; mount it (and point `DATABASE` at a path
+inside it) so the cache survives container restarts. Because the container
+runs as a non-root user, the bind-mounted `data/` directory must be
+writable by that user — pass `--user "$(id -u):$(id -g)"` as shown above
+(so the container writes as your host user), or alternatively `chown` the
+host directory to UID 65532 ahead of time.

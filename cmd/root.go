@@ -19,11 +19,11 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "bsh-spy-go",
-	Short: "A brief description of your application",
-	Long: `A longer description of what your application does and how it works.
-
-This can be multiple lines and should provide helpful context about the
-purpose and usage of your CLI tool.`,
+	Short: "Scrape a radio station's now-playing feed into a Spotify playlist",
+	Long: `bsh-spy-go polls a radio station's now-playing feed (e.g. a Streemlion
+JSON endpoint), matches tracks against Spotify, and appends newly played
+songs to a target Spotify playlist. It can run as a one-shot check or as a
+long-running polling daemon.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		initConfig()
 		setupLogging()
@@ -95,13 +95,23 @@ func setupLogging() {
 		})
 	}
 
-	if viper.GetBool("debug") {
-		log.SetLevel(logrus.DebugLevel)
-	} else if viper.GetBool("verbose") {
-		log.SetLevel(logrus.InfoLevel)
-	} else {
-		log.SetLevel(logrus.WarnLevel)
+	log.SetLevel(resolveLogLevel(viper.GetBool("debug"), viper.GetBool("verbose"), viper.GetString("log_level")))
+}
+
+// resolveLogLevel picks the logrus level: --debug and --verbose take
+// precedence (debug > verbose), otherwise the configured log_level string
+// (default "info" via config.SetDefaults), falling back to Info if unparseable.
+func resolveLogLevel(debug, verbose bool, logLevel string) logrus.Level {
+	if debug {
+		return logrus.DebugLevel
 	}
+	if verbose {
+		return logrus.InfoLevel
+	}
+	if lvl, err := logrus.ParseLevel(logLevel); err == nil {
+		return lvl
+	}
+	return logrus.InfoLevel
 }
 
 // GetConfig returns the application configuration, loading it if necessary
