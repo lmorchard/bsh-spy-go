@@ -104,7 +104,7 @@ func (c *HTTPClient) do(ctx context.Context, method, path string, body any, out 
 					wait = time.Duration(secs) * time.Second
 				}
 			}
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			lastErr = fmt.Errorf("rate limited on %s", path)
 			select {
 			case <-time.After(wait):
@@ -114,11 +114,11 @@ func (c *HTTPClient) do(ctx context.Context, method, path string, body any, out 
 			continue
 		}
 		if resp.StatusCode >= 500 {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			lastErr = fmt.Errorf("status %d on %s", resp.StatusCode, path)
 			continue
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		if resp.StatusCode >= 400 {
 			msg, _ := io.ReadAll(resp.Body)
 			return fmt.Errorf("status %d on %s: %s", resp.StatusCode, path, msg)

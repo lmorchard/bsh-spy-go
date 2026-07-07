@@ -44,7 +44,7 @@ var authCmd = &cobra.Command{
 		mux := http.NewServeMux()
 		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			authURL := conf.AuthCodeURL("state-noop", oauth2.AccessTypeOffline)
-			fmt.Fprintf(w, `<html><body><a href=%q>Authorize!</a></body></html>`, authURL)
+			_, _ = fmt.Fprintf(w, `<html><body><a href=%q>Authorize!</a></body></html>`, authURL)
 		})
 		mux.HandleFunc("/authorize", func(w http.ResponseWriter, r *http.Request) {
 			q := r.URL.Query()
@@ -58,7 +58,7 @@ var authCmd = &cobra.Command{
 				return
 			}
 			snippet := fmt.Sprintf("SPOTIFY_REFRESH_TOKEN=%s", tok.RefreshToken)
-			fmt.Fprintf(w, `<html><body><h2>Add this to your config/.env</h2><textarea style="width:100%%;height:4em">%s</textarea></body></html>`, snippet)
+			_, _ = fmt.Fprintf(w, `<html><body><h2>Add this to your config/.env</h2><textarea style="width:100%%;height:4em">%s</textarea></body></html>`, snippet)
 			fmt.Println(snippet)
 			log.Info("refresh token issued — printed to stdout and browser")
 		})

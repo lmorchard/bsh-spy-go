@@ -70,7 +70,7 @@ func Fetch(ctx context.Context, url string) (NowPlaying, error) {
 	if err != nil {
 		return NowPlaying{}, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return NowPlaying{}, fmt.Errorf("status %d fetching %s", resp.StatusCode, url)
 	}
