@@ -1,0 +1,21 @@
+# Configuration file for bsh-spy-go
+# Copy this to bsh-spy-go.yaml and customize as needed
+
+# Database configuration
+database: "bsh-spy-go.db"
+
+# Logging configuration
+verbose: false
+debug: false
+log_json: false
+
+# Example command-specific configuration
+# Uncomment and customize as needed for your commands
+#
+# fetch:
+#   concurrency: 10
+#   timeout: 30s
+#
+# serve:
+#   port: 8080
+#   host: "localhost"
