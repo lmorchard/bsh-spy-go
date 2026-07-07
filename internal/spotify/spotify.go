@@ -73,16 +73,20 @@ func SearchQuery(artist, title string) string {
 }
 
 func (c *HTTPClient) do(ctx context.Context, method, path string, body any, out any) error {
-	var reqBody io.Reader
+	var bodyBytes []byte
 	if body != nil {
 		b, err := json.Marshal(body)
 		if err != nil {
 			return err
 		}
-		reqBody = bytes.NewReader(b)
+		bodyBytes = b
 	}
 	var lastErr error
 	for attempt := 0; attempt < c.MaxRetries; attempt++ {
+		var reqBody io.Reader
+		if bodyBytes != nil {
+			reqBody = bytes.NewReader(bodyBytes)
+		}
 		req, err := http.NewRequestWithContext(ctx, method, c.BaseURL+path, reqBody)
 		if err != nil {
 			return err

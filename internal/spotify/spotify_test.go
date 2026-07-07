@@ -3,8 +3,10 @@ package spotify
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -76,6 +78,32 @@ func TestAddToPlaylistPostsURIs(t *testing.T) {
 	}
 	if len(gotBody.URIs) != 1 || gotBody.URIs[0] != "spotify:track:t1" {
 		t.Fatalf("posted uris: %+v", gotBody.URIs)
+	}
+}
+
+func TestAddToPlaylistRetriesWithBody(t *testing.T) {
+	var bodies []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		bodies = append(bodies, string(b))
+		if len(bodies) == 1 {
+			w.WriteHeader(http.StatusInternalServerError) // force one retry
+			return
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{"snapshot_id": "s1"})
+	}))
+	defer srv.Close()
+	c := New(srv.Client())
+	c.BaseURL = srv.URL
+	c.MaxRetries = 3
+	if err := c.AddToPlaylist(context.Background(), "pl", []string{"spotify:track:t1"}); err != nil {
+		t.Fatal(err)
+	}
+	if len(bodies) < 2 {
+		t.Fatalf("expected a retry (>=2 requests), got %d", len(bodies))
+	}
+	if !strings.Contains(bodies[1], "spotify:track:t1") {
+		t.Fatalf("retried request body lost the uris: %q", bodies[1])
 	}
 }
 
