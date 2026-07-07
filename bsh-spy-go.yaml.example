@@ -1,21 +1,14 @@
-# Configuration file for bsh-spy-go
-# Copy this to bsh-spy-go.yaml and customize as needed
+# Spotify credentials (or set as env: SPOTIFY_CLIENT_ID, etc.)
+spotify_client_id: ""
+spotify_client_secret: ""
+spotify_refresh_token: ""
+spotify_playlist_id: ""
 
-# Database configuration
-database: "bsh-spy-go.db"
+# Station status JSON
+streemlion_json_url: "https://radio.streemlion.com:2405/status-json.xsl"
 
-# Logging configuration
-verbose: false
-debug: false
-log_json: false
+# Poll interval (Go duration) and DB path
+interval: "60s"
+database: "data/bsh.db"
 
-# Example command-specific configuration
-# Uncomment and customize as needed for your commands
-#
-# fetch:
-#   concurrency: 10
-#   timeout: 30s
-#
-# serve:
-#   port: 8080
-#   host: "localhost"
+log_level: "info"
