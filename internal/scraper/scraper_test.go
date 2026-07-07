@@ -30,6 +30,17 @@ func TestCleanUpSongFixups(t *testing.T) {
 	}
 }
 
+func TestParseDropsTrailingDashSegments(t *testing.T) {
+	body := []byte(`{"icestats":{"source":{"metadata_updated":"06/07/2026 12:34:56 +0000","yp_currently_playing":"Artist - Title - Radio Edit"}}}`)
+	np, err := Parse(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if np.Artist != "Artist" || np.Title != "Title" {
+		t.Fatalf("got artist=%q title=%q; want Artist/Title (trailing segment dropped)", np.Artist, np.Title)
+	}
+}
+
 func TestParseDate(t *testing.T) {
 	np, err := Parse([]byte(`{"icestats":{"source":{"metadata_updated":"06/07/2026 12:34:56 +0000","yp_currently_playing":"A - B"}}}`))
 	if err != nil {

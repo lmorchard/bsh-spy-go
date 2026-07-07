@@ -40,7 +40,7 @@ func Parse(body []byte) (NowPlaying, error) {
 		return NowPlaying{}, fmt.Errorf("decode status json: %w", err)
 	}
 	song := p.Icestats.Source.YPCurrentlyPlaying
-	parts := strings.SplitN(song, " - ", 2)
+	parts := strings.Split(song, " - ")
 	artist := html.UnescapeString(strings.TrimSpace(parts[0]))
 	title := ""
 	if len(parts) > 1 {
