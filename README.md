@@ -1,6 +1,6 @@
 # bsh-spy-go
 
-A Go CLI that watches [Burning Shed Radio](https://radio.streemlion.com/)'s
+A Go CLI that watches [Big Sonic Heaven Radio](https://bigsonicheaven.com/)'s
 now-playing status and adds each newly-played track to a Spotify playlist.
 It polls the station's status JSON, matches the current track on Spotify,
 and appends it to a playlist — skipping anything already added, tracking
