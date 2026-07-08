@@ -21,6 +21,7 @@ type Deps struct {
 	Spotify    spotify.Client
 	Store      StoreIface
 	PlaylistID string
+	DryRun     bool
 }
 
 // ProcessSong searches for np, adds it to the playlist if new, and caches it
@@ -31,6 +32,10 @@ func ProcessSong(ctx context.Context, d Deps, np scraper.NowPlaying, log *logrus
 		return err
 	}
 	if !found {
+		if d.DryRun {
+			log.WithFields(logrus.Fields{"artist": np.Artist, "title": np.Title}).Info("no match — would record mystery")
+			return nil
+		}
 		log.WithFields(logrus.Fields{"artist": np.Artist, "title": np.Title}).Info("no match — recording mystery")
 		return d.Store.RecordMystery(np.Artist, np.Title, spotify.SearchQuery(np.Artist, np.Title))
 	}
@@ -40,7 +45,16 @@ func ProcessSong(ctx context.Context, d Deps, np scraper.NowPlaying, log *logrus
 		return err
 	}
 	if seen {
+		if d.DryRun {
+			log.WithFields(logrus.Fields{"artist": np.Artist, "title": np.Title, "id": track.ID}).Info("already in playlist — would skip")
+			return nil
+		}
 		log.WithField("id", track.ID).Debug("already in cache — skipping")
+		return nil
+	}
+
+	if d.DryRun {
+		log.WithFields(logrus.Fields{"artist": np.Artist, "title": np.Title, "id": track.ID, "uri": track.URI}).Info("would add")
 		return nil
 	}
 
