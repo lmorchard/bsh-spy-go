@@ -13,7 +13,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var runOnce bool
+var (
+	runOnce bool
+	dryRun  bool
+)
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -32,7 +35,7 @@ var runCmd = &cobra.Command{
 		defer stop()
 
 		sp := spotify.NewFromRefreshToken(ctx, cfg.SpotifyClientID, cfg.SpotifyClientSecret, cfg.SpotifyRefreshToken)
-		deps := runner.Deps{Spotify: sp, Store: st, PlaylistID: cfg.SpotifyPlaylistID}
+		deps := runner.Deps{Spotify: sp, Store: st, PlaylistID: cfg.SpotifyPlaylistID, DryRun: dryRun}
 
 		cycle := func() {
 			np, err := scraper.Fetch(ctx, cfg.StreemlionURL)
@@ -67,5 +70,6 @@ var runCmd = &cobra.Command{
 
 func init() {
 	runCmd.Flags().BoolVar(&runOnce, "once", false, "run a single poll and exit")
+	runCmd.Flags().BoolVar(&dryRun, "dry-run", false, "report what would happen without adding to the playlist or writing the cache")
 	rootCmd.AddCommand(runCmd)
 }

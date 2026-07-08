@@ -38,6 +38,11 @@ Thumbs.db
 *.yaml
 !*.yaml.example
 
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
 # Build artifacts
 build/
 dist/

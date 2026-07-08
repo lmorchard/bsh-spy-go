@@ -96,3 +96,27 @@ func TestNoResultRecordsMystery(t *testing.T) {
 		t.Fatalf("mysteries=%d addCalls=%d", st.mysteries, sp.addCalls)
 	}
 }
+
+func TestDryRunNewTrackDoesNotAddOrCache(t *testing.T) {
+	sp := &fakeSpotify{track: spotify.Track{ID: "t1", URI: "u1"}, found: true}
+	st := newFakeStore()
+	d := Deps{Spotify: sp, Store: st, PlaylistID: "pl", DryRun: true}
+	if err := ProcessSong(context.Background(), d, np(), log()); err != nil {
+		t.Fatal(err)
+	}
+	if sp.addCalls != 0 || len(st.added) != 0 {
+		t.Fatalf("dry-run must not add/cache: addCalls=%d added=%+v", sp.addCalls, st.added)
+	}
+}
+
+func TestDryRunNoMatchDoesNotRecordMystery(t *testing.T) {
+	sp := &fakeSpotify{found: false}
+	st := newFakeStore()
+	d := Deps{Spotify: sp, Store: st, PlaylistID: "pl", DryRun: true}
+	if err := ProcessSong(context.Background(), d, np(), log()); err != nil {
+		t.Fatal(err)
+	}
+	if st.mysteries != 0 || sp.addCalls != 0 {
+		t.Fatalf("dry-run must not record mystery: mysteries=%d addCalls=%d", st.mysteries, sp.addCalls)
+	}
+}
